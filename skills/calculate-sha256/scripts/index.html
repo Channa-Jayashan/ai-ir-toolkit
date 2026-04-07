@@ -25,6 +25,26 @@ limitations under the License.
     <title>Calculate SHA-256</title>
   </head>
   <body>
-    <script src="index.js"></script>
+    <script>
+      async function digestMessage(message) {
+        const msgUint8 = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+        return {result: hashHex};
+      }
+
+      window['ai_edge_gallery_get_result'] = async (data) => {
+        try {
+          const jsonData = JSON.parse(data);
+          return JSON.stringify(await digestMessage(jsonData['text']));
+        } catch (e) {
+          console.error(e);
+          return JSON.stringify({error: `Failed to calculate SHA-256: ${e.message}`});
+        }
+      };
+    </script>
   </body>
 </html>
