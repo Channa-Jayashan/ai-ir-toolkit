@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kali Execute</title>
+</head>
+<body>
+  <script>
+    const KALI_IP = "10.22.243.106";   // ←←← CHANGE THIS TO YOUR KALI IP
+    const API_URL = `http://${KALI_IP}:8000/execute`;
+
+    async function runTool(tool, args = [], timeout = 60) {
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tool, args, timeout })
+        });
+        return await response.json();
+      } catch (e) {
+        return { error: `Network error: ${e.message}. Is the Kali server running?` };
+      }
+    }
+
+    window['ai_edge_gallery_get_result'] = async (data) => {
+      try {
+        const jsonData = JSON.parse(data);
+        return JSON.stringify(await runTool(jsonData.tool, jsonData.args || [], jsonData.timeout || 60));
+      } catch (e) {
+        console.error(e);
+        return JSON.stringify({ error: `Failed to call Kali: ${e.message}` });
+      }
+    };
+  </script>
+</body>
+</html>
